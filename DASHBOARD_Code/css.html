@@ -1,0 +1,231 @@
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: arial;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  background-color: #03045e;
+}
+
+.main {
+  width: 80%;
+  height: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+ }
+
+.header {
+  width: 100%;
+  height: 25%;
+}
+
+.menu {
+  margin: auto;
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 39%);
+  grid-template-rows: repeat(1, 85%);
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 650px;
+}
+
+.option {
+  background-color: white;
+  padding: 7px 14px;
+  border-radius: 10px;
+  opacity: 0.7;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
+
+.option:hover {
+  opacity: 1;
+ }
+
+.content {
+  width: 100%;
+  height: 72%;
+  background-color: white;
+  border-radius: 35px 35px 0 0;
+  display: flex;
+}
+
+[active="true"] {
+  opacity: 1;
+  height: 50px;
+}
+
+.title {
+  font-size: 24px;
+  text-align: center;
+  color: white;
+}
+
+.subtitle {
+  font-weight: bold;
+  font-size: 42px;
+  text-align: center;
+  color: white;
+}
+
+.team {
+  margin-top: 20px;
+}
+
+.graphs {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width: 60%;
+}
+
+.p-txt {
+  display: flex;
+  align-items: center;
+  margin-left: 30px;
+}
+
+.p-title {
+  font-size: 20px;
+}
+
+.reading {
+  font-weight: bold;
+  font-size: 46px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.live-bar {
+  border: 2px solid black;
+  width: 80%;
+  height: 35px;
+  border-radius: 100px;
+  background-color: #bb0000;
+  margin-left: 30px;
+  position: relative;
+}
+
+.live-bar:after {
+  content: "";
+  position: absolute;
+  width: 35%;
+  height: 31px;
+  background-color: lime;
+  border-top-left-radius: 100px;
+  border-bottom-left-radius: 100px;
+}
+
+.humid:after {
+  width: 75%;
+}
+
+.bar-cursor {
+  position: absolute;
+  top: 15px;
+  border: 10px solid;
+  border-color: transparent transparent black transparent;
+  transform: scaleY(2);
+  z-index: 999;
+}
+
+.status-bar {
+  height: 100%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  border-left: 2px solid black;
+}
+
+.index {
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.s-txt {
+  font-size: 24px;
+}
+
+.s-tag {
+  font-size: 32px;
+  font-weight: bold;
+  background-color: rgba(0, 150, 0, 0.7);
+  padding: 10px 30px;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.t-txt {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.tt {
+  font-size: 20px;
+}
+
+.chart-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.graphs-main {
+  display: block;
+  width: 100%;
+}
+
+canvas {
+  width: 325px;
+  height: 200px;
+}
+
+.graph-container {
+  display: flex;
+  height: 80%;
+  width: 100%;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.separator {
+  width: 3px;
+  height: 100%;
+  background-color: black;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.graph-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px;
+}
+</style>

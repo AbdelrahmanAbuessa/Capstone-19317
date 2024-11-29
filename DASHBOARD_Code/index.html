@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <?!= HtmlService.createHtmlOutputFromFile("css").getContent(); ?>
+  </head>
+  <body>
+    <div class="main">
+      <div class="header">
+        <div class="team">
+          <div class="title">19317</div>
+          <div class="subtitle">BESS Live Dashboard</div>
+        </div>
+      <div class="menu">
+        <div class="option" active="true" id="live-dashboard">Live Dashboard</div>
+        <div class="option" active="false" id="data-graphs">Data Graphs</div>
+      </div>
+    </div>
+    <div class="content" id="displayed">
+      
+    </div>
+  </div>
+</div>
+
+    <?!= HtmlService.createHtmlOutputFromFile("js").getContent(); ?>
+  </body>
+</html>

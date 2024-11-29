@@ -1,0 +1,429 @@
+  <script>
+    let displayed = document.getElementById("displayed");
+
+    let live_dashboard_html = `<div class="graphs">
+      <div class="parameter">
+      <div class="p-txt">
+        <div class="p-title">Temperature:</div>
+        <div id="live-temp" class="reading"></div>
+        <div class="unit"><sup>o</sup>C</div>
+      </div>
+      <div class="live-bar">
+        <div class="bar-cursor" id="temp-cursor"></div>
+      </div>
+      </div>
+      <div class="parameter">
+      <div class="p-txt">
+        <div class="p-title">Carbon Monoxide:</div>
+        <div id="live-cot" class="reading"></div>
+        <div class="unit">ppm</div>
+      </div>
+      <div class="live-bar">
+        <div class="bar-cursor" id="cot-cursor"></div>
+      </div>
+      </div>
+      <div class="parameter">
+      <div class="p-txt">
+        <div class="p-title">Humidity:</div>
+        <div id="live-humid" class="reading"></div>
+        <div class="unit">%</div>
+      </div>
+      <div class="live-bar humid">
+        <div class="bar-cursor" id="humid-cursor"></div>
+      </div>
+      </div>      
+    </div>
+    <div class="status-bar">
+      <div class="index">
+        <div class="s-txt">Danger Index</div>
+      <div class="s-tag" id="status">LOW</div>
+      </div>
+    </div>`;
+
+    let data_graphs_html = `<div class="graphs-main">
+        <div class="chart-title">Line Charts for the latest 20 updates</div>
+        <div class="graph-container">
+          <div class="slot">
+            <div class="graph-title">Temperature (<sup>o</sup>C)</div>
+            <canvas id="temp-line-graph" class="line-chart"></canvas> 
+          </div>
+          <div class="separator"></div>
+          <div class="slot">
+            <div class="graph-title">Carbon Monoxide (ppm)</div>
+            <canvas id="cot-line-graph" class="line-chart"></canvas> 
+          </div>
+          <div class="separator"></div>
+          <div class="slot">
+            <div class="graph-title">Humidity (%)</div>
+            <canvas id="humid-line-graph" class="line-chart"></canvas> 
+          </div>
+      </div>`
+
+    let active_element = document.querySelector(`[active="true"]`);
+
+    if (active_element.id === "live-dashboard") {
+      displayed.innerHTML = live_dashboard_html;
+      function refreshDashboard(arr) {
+          let temp_txt = document.getElementById('live-temp');
+          let humid_txt = document.getElementById('live-humid');
+          let cot_txt = document.getElementById('live-cot');
+
+          let stat = document.getElementById("status");
+          let danger = 0;
+
+          let temp_cursor = document.getElementById('temp-cursor');
+          let humid_cursor = document.getElementById('humid-cursor');
+          let cot_cursor = document.getElementById('cot-cursor');
+
+          temp_txt.innerText = arr.temp || 'N/A';
+          humid_txt.innerText = arr.humid || 'N/A';
+          cot_txt.innerText = arr.cot || 'N/A';
+
+          let temp_V1 = 30;
+          let temp_V2 = 45;
+          let temp_V3 = 60;
+          let temp_level;
+
+          let humid_V1 = 75;
+          let humid_V2 = 80;
+          let humid_V3 = 95;
+          let humid_level;
+
+          let cot_V1 = 65;
+          let cot_V2 = 95;
+          let cot_V3 = 125;
+          let cot_level;
+
+          if (arr.temp <= temp_V1) {
+            temp_cursor.style.setProperty("left", `calc(${arr.temp * 35 / temp_V1}% - 10px)`)
+            temp_level = 0;
+          } else if (arr.temp > temp_V1 && arr.temp < temp_V3) {
+            temp_cursor.style.setProperty("left", `calc(${(arr.temp) * 65 / (temp_V3 - temp_V1)}% - 30% - 10px)`)
+            temp_level = 1;
+          } else {
+            temp_cursor.style.setProperty("left", `calc(100% - 10px)`)
+            temp_level = 1;
+          }
+      
+          if (arr.cot <= cot_V1) {
+            cot_cursor.style.setProperty("left", `calc(${arr.cot * 35 / cot_V1}% - 10px)`)
+            cot_level = 0;
+          } else if (arr.cot > cot_V1 && arr.cot < cot_V3) {
+            cot_cursor.style.setProperty("left", `calc(${(arr.cot) * 65 / (cot_V3 - cot_V1)}% - 30% - 10px)`)
+            cot_level = 1;
+          } else {
+            cot_cursor.style.setProperty("left", `calc(100% - 10px)`)
+            cot_level = 1;
+          }
+
+          if (arr.humid <= 100) {
+            humid_cursor.style.setProperty("left", `calc(${arr.humid}% - 10px)`)
+          } else {
+            humid_cursor.style.setProperty("left", `calc(100% - 10px)`)
+          }
+
+          if (arr.humid <= humid_V1) {
+            humid_level = 0;
+          } else {
+            humid_level = 1;
+          }
+
+          danger = humid_level + cot_level + temp_level;
+          switch (danger) {
+            case 0:
+              stat.innerText = "LOW";
+              stat.style.setProperty("background-color", "rgba(0, 150, 0, 0.7)");
+              break;
+
+            case 1:
+              stat.innerText = "MID";
+              stat.style.setProperty("background-color", "rgba(150, 150, 0, 0.7)");
+              break;
+
+            case 2:
+              stat.innerText = "HIGH";
+              stat.style.setProperty("background-color", "rgba(150, 0, 0, 0.7)");
+              break;
+
+            case 3:
+              stat.innerText = "EXTREME";
+              stat.style.setProperty("background-color", "rgba(150, 0, 150, 0.7)");
+              break;
+          } 
+        }
+
+        setInterval(function() {
+          google.script.run.withSuccessHandler(refreshDashboard).postData();
+        }, 1000);
+    } else if (active_element.id === "data-graphs") {
+      displayed.innerHTML = data_graphs_html;
+      function refreshGraphs(arr) {
+        let x = [];
+        let yTemp = [];
+        let yHumid = [];
+        let yCot = [];
+
+        for (let i = 0; i < arr.length; i++) {
+          x.push(i + 1);
+          yTemp.push(arr[i].temp);
+          yHumid.push(arr[i].humid);
+          yCot.push(arr[i].cot);
+        }
+        
+        new Chart("cot-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yCot
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yCot), max: Math.max(...yCot)}}],
+            },
+            animation: 0
+          }
+        });
+
+        new Chart("temp-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yTemp
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yTemp), max: Math.max(...yTemp)}}],
+            },
+            animation: 0
+          }
+        });
+
+        new Chart("humid-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yHumid
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yHumid), max: Math.max(...yHumid)}}],
+            },
+            animation: 0
+          }
+        });
+        
+      }
+      setInterval(function() {
+        google.script.run.withSuccessHandler(refreshGraphs).post20Data();
+      }, 1000);
+    }
+
+    document.addEventListener("click", function (e) {
+      let targetElement = e.target;
+      if (targetElement.className === "option") {
+        let past_active = document.querySelector(`[active="true"]`)
+        past_active.setAttribute("active", "false")
+      }
+      if (targetElement.id === "live-dashboard") {
+        displayed.innerHTML = live_dashboard_html;
+        targetElement.setAttribute("active", "true");
+        function postData(arr) {
+          let temp_txt = document.getElementById('live-temp');
+          let humid_txt = document.getElementById('live-humid');
+          let cot_txt = document.getElementById('live-cot');
+
+          let stat = document.getElementById("status");
+          let danger = 0;
+
+          let temp_cursor = document.getElementById('temp-cursor');
+          let humid_cursor = document.getElementById('humid-cursor');
+          let cot_cursor = document.getElementById('cot-cursor');
+
+          temp_txt.innerText = arr.temp || 'N/A';
+          humid_txt.innerText = arr.humid || 'N/A';
+          cot_txt.innerText = arr.cot || 'N/A';
+
+          let temp_V1 = 30;
+          let temp_V2 = 45;
+          let temp_V3 = 60;
+          let temp_level;
+
+          let humid_V1 = 75;
+          let humid_V2 = 80;
+          let humid_V3 = 95;
+          let humid_level;
+
+          let cot_V1 = 65;
+          let cot_V2 = 95;
+          let cot_V3 = 125;
+          let cot_level;
+
+          if (arr.temp <= temp_V1) {
+            temp_cursor.style.setProperty("left", `calc(${arr.temp * 35 / temp_V1}% - 10px)`)
+            temp_level = 0;
+          } else if (arr.temp > temp_V1 && arr.temp < temp_V3) {
+            temp_cursor.style.setProperty("left", `calc(${(arr.temp) * 65 / (temp_V3 - temp_V1)}% - 30% - 10px)`)
+            temp_level = 1;
+          } else {
+            temp_cursor.style.setProperty("left", `calc(100% - 10px)`)
+            temp_level = 1;
+          }
+      
+          if (arr.cot <= cot_V1) {
+            cot_cursor.style.setProperty("left", `calc(${arr.cot * 35 / cot_V1}% - 10px)`)
+            cot_level = 0;
+          } else if (arr.cot > cot_V1 && arr.cot < cot_V3) {
+            cot_cursor.style.setProperty("left", `calc(${(arr.cot) * 65 / (cot_V3 - cot_V1)}% - 30% - 10px)`)
+            cot_level = 1;
+          } else {
+            cot_cursor.style.setProperty("left", `calc(100% - 10px)`)
+            cot_level = 1;
+          }
+
+          if (arr.humid <= 100) {
+            humid_cursor.style.setProperty("left", `calc(${arr.humid}% - 10px)`)
+          } else {
+            humid_cursor.style.setProperty("left", `calc(100% - 10px)`)
+          }
+
+          if (arr.humid <= humid_V1) {
+            humid_level = 0;
+          } else {
+            humid_level = 1;
+          }
+
+          danger = humid_level + cot_level + temp_level;
+          switch (danger) {
+            case 0:
+              stat.innerText = "LOW";
+              stat.style.setProperty("background-color", "rgba(0, 150, 0, 0.7)");
+              break;
+
+            case 1:
+              stat.innerText = "MID";
+              stat.style.setProperty("background-color", "rgba(150, 150, 0, 0.7)");
+              break;
+
+            case 2:
+              stat.innerText = "HIGH";
+              stat.style.setProperty("background-color", "rgba(150, 0, 0, 0.7)");
+              break;
+
+            case 3:
+              stat.innerText = "EXTREME";
+              stat.style.setProperty("background-color", "rgba(150, 0, 150, 0.7)");
+              break;
+          } 
+        }
+
+        setInterval(function() {
+          google.script.run.withSuccessHandler(postData).postData();
+        }, 1000);
+      } else if (targetElement.id === "data-graphs") {
+        displayed.innerHTML = "";
+        displayed.innerHTML = data_graphs_html;
+      function refreshGraphs(arr) {
+        let x = [];
+        let yTemp = [];
+        let yHumid = [];
+        let yCot = [];
+
+        for (let i = 0; i < arr.length; i++) {
+          x.push(i + 1);
+          yTemp.push(arr[i].temp);
+          yHumid.push(arr[i].humid);
+          yCot.push(arr[i].cot);
+        }
+        
+        new Chart("cot-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yCot
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yCot), max: Math.max(...yCot)}}],
+            },
+            animation: 0
+          }
+        });
+
+        new Chart("temp-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yTemp
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yTemp), max: Math.max(...yTemp)}}],
+            },
+            animation: 0
+          }
+        });
+
+        new Chart("humid-line-graph", {
+          type: "line",
+          data: {
+            labels: x,
+            datasets: [{
+              fill: false,
+              lineTension: 0.5,
+              backgroundColor: "rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,1.0)",
+              data: yHumid
+            }]
+          },
+          options: {
+            legend: {display: false},
+            scales: {
+              yAxes: [{ticks: {min: Math.min(...yHumid), max: Math.max(...yHumid)}}],
+            },
+            animation: 0
+          }
+        });
+        
+      }
+      setInterval(function() {
+        google.script.run.withSuccessHandler(refreshGraphs).post20Data();
+      }, 1000);
+        targetElement.setAttribute("active", "true");
+      }
+    })
+  </script>
